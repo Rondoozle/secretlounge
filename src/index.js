@@ -9,8 +9,9 @@ import config from '../config.json'
 import { connect } from 'coffea'
 const networks = connect(config)
 
-import { getUser, addUser, delUser, getUsers } from './db'
+import { getUser, addUser, delUser, getUsers, setRank } from './db'
 import { NOT_IN_CHAT } from './messages'
+import { RANKS, getRank } from './ranks'
 
 const sendToAll = (rawEvent) => {
   let evt
@@ -39,7 +40,11 @@ const relay = (type) => {
 
 ['message', 'audio', 'document', 'photo', 'sticker', 'video', 'voice'].map(relay)
 
-const getUsername = (user) => '@' + user.username
+const getUsername = (user) => {
+  const rank = user.rank > 0 ? ' (' + getRank(user.rank) + ')' : ''
+  return '@' + user.username + rank
+}
+
 const getUsernameFromEvent = (evt) => evt.raw && evt.raw.from && evt.raw.from.username
 
 const commands = (cmd, evt, reply) => {
@@ -64,6 +69,17 @@ const commands = (cmd, evt, reply) => {
         }
       })
       break
+    case 'info':
+      const user = getUser(evt.user)
+      reply({
+        type: 'message',
+        user: evt.user,
+        text: `<b>id:</b> ${user.id}, <b>username:</b> @${user.username}, <b>rank:</b> ${user.rank} (${getRank(user.rank)})`,
+        options: {
+          parse_mode: 'HTML'
+        }
+      })
+      break
   }
 }
 
@@ -78,6 +94,10 @@ networks.on('command', (evt, reply) => {
       const username = getUsernameFromEvent(evt)
       addUser(evt.user, username)
       sendToAll('@' + username + ' joined the chat')
+
+      // make first user admin
+      if (getUsers().length === 1) setRank(evt.user, RANKS.admin)
+
       return reply('Welcome to real time /b/ - NO SPAMMING')
     }
   } else {
