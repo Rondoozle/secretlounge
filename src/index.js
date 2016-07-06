@@ -66,7 +66,7 @@ networks.on('command', (evt, reply) => {
       const username = getUsernameFromEvent(evt)
       addUser(evt.user, username)
       sendToAll('@' + username + ' just joined /b/!')
-      return reply('Welcome to /b/!')
+      return reply('Welcome to real time /b/ - NO SPAMMING')
     }
   } else {
     if (!getUser(evt.user)) return reply('You\'re not chatting in /b/ yet! Use /start')
