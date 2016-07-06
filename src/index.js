@@ -121,6 +121,13 @@ const commands = (cmd, evt, reply) => {
       const newDebugMode = !user.debug
       setDebugMode(evt.user, newDebugMode)
       reply(configSet('debug mode', newDebugMode))
+      break
+    case 'source':
+      reply('https://github.com/6697/secretlounge')
+      break
+    case 'issues':
+      reply('Please report issues here: https://github.com/6697/secretlounge/issues')
+      break
   }
 }
 
