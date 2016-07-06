@@ -13,13 +13,14 @@ import { getUser, addUser, delUser, getUsers } from './db'
 
 const relay = (type) => {
   networks.on(type, (evt, reply) => {
-    log('relayed: %o', evt)
-    // relay message to all users
-    getUsers().map((user) => {
-      if (config.debug || user.id !== evt.user) { // don't relay back to sender
-        networks.send({ ...evt, chat: user.id })
-      }
-    })
+    if (evt.text.charAt(0) !== '/') { // don't relay commands
+      // relay message to all users
+      getUsers().map((user) => {
+        if (config.debug || user.id !== evt.user) { // don't relay back to sender
+          networks.send({ ...evt, chat: user.id })
+        }
+      })
+    }
   })
 }
 
@@ -35,8 +36,6 @@ const commands = (cmd, evt) => {
 }
 
 networks.on('command', (evt, reply) => {
-  log('Received command event: %o', evt)
-
   const cmd = evt.cmd.toLowerCase()
 
   if (cmd === 'start') {
