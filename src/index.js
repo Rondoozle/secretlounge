@@ -71,11 +71,17 @@ const adminCommands = (cmd, evt, reply) => {
       setRank(getUserByUsername(evt.args[0]).id, RANKS.admin)
       reply(htmlMessage(`<i>made</> @${evt.args[0]} <i>an admin</i>`))
       break
+    case 'adminsay':
+      if (evt.args.length <= 0) return reply(cursive('please specify a message, e.g. /adminsay message'))
+      sendToAll(htmlMessage('<i>the </i><b>admins</b><i> shout from the heavens:</i> ' + evt.args.join(' ')))
   }
 }
 
 const modCommands = (cmd, evt, reply) => {
   switch (cmd) {
+    case 'modsay':
+      if (evt.args.length <= 0) return reply(cursive('please specify a message, e.g. /modsay message'))
+      sendToAll(htmlMessage('<i>the </i><b>mods</b><i> shout from the heavens:</i> ' + evt.args.join(' ')))
     // case 'ban':
     //   // TODO: make this accessible by replying to one of the bots messages and doing /ban
   }
