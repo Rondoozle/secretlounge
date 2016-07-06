@@ -52,7 +52,14 @@ const commands = (cmd, evt, reply) => {
     case 'stop':
       if (!getUser(evt.user)) reply(NOT_IN_CHAT)
       else delUser(evt.user)
-      sendToAll('@' + getUsernameFromEvent(evt) + ' left the chat')
+      sendToAll({
+        type: 'message',
+        user: evt.user,
+        text: '@' + getUsernameFromEvent(evt) + ' <i>left the chat</i>',
+        options: {
+          parse_mode: 'HTML'
+        }
+      })
       break
     case 'users':
       const users = getUsers()
@@ -93,7 +100,14 @@ networks.on('command', (evt, reply) => {
     else {
       const username = getUsernameFromEvent(evt)
       addUser(evt.user, username)
-      sendToAll('@' + username + ' joined the chat')
+      sendToAll({
+        type: 'message',
+        user: evt.user,
+        text: '@' + username + ' <i>joined the chat</i>',
+        options: {
+          parse_mode: 'HTML'
+        }
+      })
 
       // make first user admin
       if (getUsers().length === 1) setRank(evt.user, RANKS.admin)
