@@ -2,7 +2,7 @@ import dude from 'debug-dude'
 const { /*debug,*/ log, info /*, warn, error*/ } = dude('bot')
 
 import { version } from '../package.json'
-info(`/b/ v${version} starting`)
+info(`secretlounge v${version} starting`)
 
 import config from '../config.json'
 
@@ -10,6 +10,7 @@ import { connect } from 'coffea'
 const networks = connect(config)
 
 import { getUser, addUser, delUser, getUsers } from './db'
+import { NOT_IN_CHAT } from './messages'
 
 const sendToAll = (rawEvent) => {
   let evt
@@ -30,7 +31,7 @@ const relay = (type) => {
         // otherwise, relay event to all users
         sendToAll(evt)
       } else {
-        reply('You\'re not chatting in /b/ yet! Use /start')
+        reply(NOT_IN_CHAT)
       }
     }
   })
@@ -44,9 +45,9 @@ const getUsernameFromEvent = (evt) => evt.raw && evt.raw.from && evt.raw.from.us
 const commands = (cmd, evt, reply) => {
   switch (cmd) {
     case 'stop':
-      if (!getUser(evt.user)) reply('You\'re not chatting in /b/ yet! Use /start')
+      if (!getUser(evt.user)) reply(NOT_IN_CHAT)
       else delUser(evt.user)
-      sendToAll('@' + getUsernameFromEvent(evt) + ' just left /b/!')
+      sendToAll('@' + getUsernameFromEvent(evt) + ' left the chat')
       break
     case 'users':
       const users = getUsers()
@@ -57,7 +58,7 @@ const commands = (cmd, evt, reply) => {
       sendToAll({
         type: 'message',
         user: evt.user,
-        text: evt.args.join(' ') + '<b> ~ ' + getUsernameFromEvent(evt) + '</b>',
+        text: evt.args.join(' ') + '<b> ~' + getUsernameFromEvent(evt) + '</b>',
         options: {
           parse_mode: 'HTML'
         }
@@ -72,15 +73,15 @@ networks.on('command', (evt, reply) => {
   const cmd = evt.cmd.toLowerCase()
 
   if (cmd === 'start') {
-    if (getUser(evt.user)) return reply('You\'re already chatting in /b/!')
+    if (getUser(evt.user)) return reply('You\'re already in the chat!')
     else {
       const username = getUsernameFromEvent(evt)
       addUser(evt.user, username)
-      sendToAll('@' + username + ' just joined /b/!')
+      sendToAll('@' + username + ' joined the chat')
       return reply('Welcome to real time /b/ - NO SPAMMING')
     }
   } else {
-    if (!getUser(evt.user)) return reply('You\'re not chatting in /b/ yet! Use /start')
+    if (!getUser(evt.user)) return reply(NOT_IN_CHAT)
     commands(cmd, evt, reply)
   }
 })
