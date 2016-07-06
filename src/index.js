@@ -11,9 +11,10 @@ const networks = connect(config)
 
 import {
   getUser, addUser, delUser, getUsers,
-  setRank, setDebugMode
+  setRank, setDebugMode,
+  getSystemConfig, setMotd
 } from './db'
-import { NOT_IN_CHAT } from './messages'
+import { NOT_IN_CHAT, configSet, configGet } from './messages'
 import { RANKS, getRank } from './ranks'
 
 const sendToAll = (rawEvent) => {
@@ -50,6 +51,30 @@ const getUsername = (user) => {
 
 const getUsernameFromEvent = (evt) => evt.raw && evt.raw.from && evt.raw.from.username
 
+const adminCommands = (cmd, evt, reply) => {
+  switch (cmd) {
+    case 'motd':
+      const motd = evt.args.join(' ')
+      if (!motd) reply(configGet(evt, 'message of the day', getSystemConfig().motd))
+      else {
+        setMotd(motd)
+        reply(configSet(evt, 'message of the day', motd))
+      }
+      break
+    // case 'mod':
+    //   // TODO: make user mod
+    // case 'admin':
+    //   // TODO: make user admin
+  }
+}
+
+const modCommands = (cmd, evt, reply) => {
+  switch (cmd) {
+    // case 'ban':
+    //   // TODO: make this accessible by replying to one of the bots messages and doing /ban
+  }
+}
+
 const commands = (cmd, evt, reply) => {
   const user = getUser(evt.user)
 
@@ -83,14 +108,7 @@ const commands = (cmd, evt, reply) => {
     case 'debug':
       const newDebugMode = !user.debug
       setDebugMode(evt.user, newDebugMode)
-      reply({
-        type: 'message',
-        user: evt.user,
-        text: '<i>Debug mode:</i> <b>' + (newDebugMode ? 'on' : 'off') + '</b>',
-        options: {
-          parse_mode: 'HTML'
-        }
-      })
+      reply(configSet(evt, 'debug mode', newDebugMode))
   }
 }
 
@@ -116,10 +134,14 @@ networks.on('command', (evt, reply) => {
       // make first user admin
       if (getUsers().length === 1) setRank(evt.user, RANKS.admin)
 
-      return reply('Welcome to real time /b/ - NO SPAMMING')
+      const motd = getSystemConfig().motd
+      if (motd) reply(motd)
     }
   } else {
-    if (!getUser(evt.user)) return reply(NOT_IN_CHAT)
+    const user = getUser(evt.user)
+    if (!user) return reply(NOT_IN_CHAT)
     commands(cmd, evt, reply)
+    if (user.rank >= RANKS.mod) modCommands(cmd, evt, reply)
+    if (user.rank >= RANKS.admin) adminCommands(cmd, evt, reply)
   }
 })
