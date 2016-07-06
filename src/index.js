@@ -52,6 +52,17 @@ const commands = (cmd, evt, reply) => {
       const users = getUsers()
       reply(users.length + ' users: ' + users.map(getUsername).join(', '))
       break
+    case 'sign':
+    case 's':
+      sendToAll({
+        type: 'message',
+        user: evt.user,
+        text: evt.args.join(' ') + '<b> ~ ' + getUsernameFromEvent(evt) + '</b>',
+        options: {
+          parse_mode: 'HTML'
+        }
+      })
+      break
   }
 }
 
