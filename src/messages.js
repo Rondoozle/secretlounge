@@ -5,24 +5,21 @@ const parseValue = (val) => {
   else return val
 }
 
-export const configSet = (evt, name, val) => {
+export const htmlMessage = (msg) => {
   return {
     type: 'message',
-    user: evt.user,
-    text: `set <i>${name}</i>: <code>${parseValue(val)}</code>`,
+    text: msg,
     options: {
       parse_mode: 'HTML'
     }
   }
 }
 
-export const configGet = (evt, name, val) => {
-  return {
-    type: 'message',
-    user: evt.user,
-    text: `<i>${name}</i>: <code>${parseValue(val)}</code>`,
-    options: {
-      parse_mode: 'HTML'
-    }
-  }
-}
+export const configGet = (name, val) =>
+  htmlMessage(`<i>${name}</i>: <code>${parseValue(val)}</code>`)
+
+export const configSet = (name, val) =>
+  htmlMessage(`set <i>${name}</i>: <code>${parseValue(val)}</code>`)
+
+export const cursive = (msg) =>
+  htmlMessage('<i>' + msg + '</i>')

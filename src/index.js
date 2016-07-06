@@ -10,11 +10,11 @@ import { connect } from 'coffea'
 const networks = connect(config)
 
 import {
-  getUser, addUser, delUser, getUsers,
+  getUser, getUserByUsername, addUser, delUser, getUsers,
   setRank, setDebugMode,
   getSystemConfig, setMotd
 } from './db'
-import { NOT_IN_CHAT, configSet, configGet } from './messages'
+import { NOT_IN_CHAT, configSet, configGet, cursive, htmlMessage } from './messages'
 import { RANKS, getRank } from './ranks'
 
 const sendToAll = (rawEvent) => {
@@ -55,16 +55,22 @@ const adminCommands = (cmd, evt, reply) => {
   switch (cmd) {
     case 'motd':
       const motd = evt.args.join(' ')
-      if (!motd) reply(configGet(evt, 'message of the day', getSystemConfig().motd))
+      if (!motd) reply(configGet('message of the day', getSystemConfig().motd))
       else {
         setMotd(motd)
-        reply(configSet(evt, 'message of the day', motd))
+        reply(configSet('message of the day', motd))
       }
       break
-    // case 'mod':
-    //   // TODO: make user mod
-    // case 'admin':
-    //   // TODO: make user admin
+    case 'mod':
+      if (evt.args.length !== 1) return reply(cursive('please specify a username, e.g. /mod username'))
+      setRank(getUserByUsername(evt.args[0]).id, RANKS.mod)
+      reply(htmlMessage(`<i>made</i> @${evt.args[0]} <i>a moderator</i>`))
+      break
+    case 'admin':
+      if (evt.args.length !== 1) return reply(cursive('please specify a username, e.g. /admin username'))
+      setRank(getUserByUsername(evt.args[0]).id, RANKS.admin)
+      reply(htmlMessage(`<i>made</> @${evt.args[0]} <i>an admin</i>`))
+      break
   }
 }
 
@@ -108,7 +114,7 @@ const commands = (cmd, evt, reply) => {
     case 'debug':
       const newDebugMode = !user.debug
       setDebugMode(evt.user, newDebugMode)
-      reply(configSet(evt, 'debug mode', newDebugMode))
+      reply(configSet('debug mode', newDebugMode))
   }
 }
 
