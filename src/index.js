@@ -27,7 +27,7 @@ const sendToAll = (rawEvent) => {
 
 const relay = (type) => {
   networks.on(type, (evt, reply) => {
-    if (evt.text.charAt(0) !== '/') { // don't parse commands again
+    if (evt && evt.text && evt.text.charAt(0) !== '/') { // don't parse commands again
       if (getUser(evt.user)) { // make sure user is in the group chat
         // otherwise, relay event to all users
         sendToAll(evt)
