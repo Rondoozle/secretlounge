@@ -23,12 +23,9 @@ Create a `config.json` file:
 ```js
 {
   "protocol": "telegram",
-  "token": "PUT_YOUR_TELEGRAM_TOKEN_FROM_BOTFATHER_HERE",
-  "debug": false
+  "token": "PUT_YOUR_TELEGRAM_TOKEN_FROM_BOTFATHER_HERE"
 }
 ```
-
-If you put `"debug": true`, the sender will also receive messages.
 
 
 ## Running

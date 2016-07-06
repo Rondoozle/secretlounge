@@ -9,7 +9,10 @@ import config from '../config.json'
 import { connect } from 'coffea'
 const networks = connect(config)
 
-import { getUser, addUser, delUser, getUsers, setRank } from './db'
+import {
+  getUser, addUser, delUser, getUsers,
+  setRank, setDebugMode
+} from './db'
 import { NOT_IN_CHAT } from './messages'
 import { RANKS, getRank } from './ranks'
 
@@ -19,7 +22,7 @@ const sendToAll = (rawEvent) => {
   else evt = rawEvent
 
   getUsers().map((user) => {
-    if (config.debug || user.id !== evt.user) { // don't relay back to sender
+    if (user.debug || user.id !== evt.user) { // don't relay back to sender
       networks.send({ ...evt, chat: user.id })
     }
   })
@@ -48,6 +51,8 @@ const getUsername = (user) => {
 const getUsernameFromEvent = (evt) => evt.raw && evt.raw.from && evt.raw.from.username
 
 const commands = (cmd, evt, reply) => {
+  const user = getUser(evt.user)
+
   switch (cmd) {
     case 'stop':
       if (!getUser(evt.user)) reply(NOT_IN_CHAT)
@@ -77,7 +82,6 @@ const commands = (cmd, evt, reply) => {
       })
       break
     case 'info':
-      const user = getUser(evt.user)
       reply({
         type: 'message',
         user: evt.user,
@@ -87,6 +91,17 @@ const commands = (cmd, evt, reply) => {
         }
       })
       break
+    case 'debug':
+      const newDebugMode = !user.debug
+      setDebugMode(evt.user, newDebugMode)
+      reply({
+        type: 'message',
+        user: evt.user,
+        text: '<i>Debug mode:</i> <b>' + (newDebugMode ? 'on' : 'off') + '</b>',
+        options: {
+          parse_mode: 'HTML'
+        }
+      })
   }
 }
 
