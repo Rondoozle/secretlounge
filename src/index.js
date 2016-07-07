@@ -1,21 +1,36 @@
 import dude from 'debug-dude'
-const { /*debug,*/ log, info /*, warn, error*/ } = dude('bot')
+const { /*debug,*/ log, info, warn /*, error*/ } = dude('bot')
 
 import { version } from '../package.json'
 info(`secretlounge v${version} starting`)
 
 import config from '../config.json'
 
-import { connect } from 'coffea'
-const networks = connect(config)
+import { connect } from '../../../caffeinery/coffea/src/index'
+import telegram from '../../../caffeinery/coffea-telegram/src/index'
+const networks = connect({
+  "protocol": telegram,
+  "token": "163546282:AAE_d45ZYlB-eOTyHq9Ouqd5-K4WsRoDKtA"
+})
 
 import {
   getUser, getUserByUsername, addUser, delUser, getUsers,
-  setRank, setDebugMode,
+  setRank, setDebugMode, warnUser,
   getSystemConfig, setMotd
 } from './db'
-import { NOT_IN_CHAT, configSet, configGet, cursive, htmlMessage } from './messages'
+import {
+  NOT_IN_CHAT,
+  configSet, configGet,
+  cursive, htmlMessage,
+  generateSmiley, infoText, modInfoText
+} from './messages'
 import { RANKS, getRank } from './ranks'
+
+let messageHistory = {} // TODO: add messages to history and link them to the users that posted them
+
+const SECONDS = 1000
+const MINUTES = 60 * SECONDS
+const HOURS = 60 * MINUTES
 
 const sendToAll = (rawEvent) => {
   let evt
@@ -24,7 +39,18 @@ const sendToAll = (rawEvent) => {
 
   getUsers().map((user) => {
     if (user.debug || user.id !== evt.user) { // don't relay back to sender
-      networks.send({ ...evt, chat: user.id })
+      const promises = networks.send({ ...evt, chat: user.id }) // TODO: return message id and store in history here
+      if (evt.user) {
+        // store message in history
+        promises && promises[0] && promises[0].then((msg) => {
+          messageHistory[msg.message_id] = { sender: evt.user }
+          console.log('storing', msg.message_id, '->', messageHistory[msg.message_id])
+          setTimeout(() => {
+            delete messageHistory[msg.message_id]
+          }, 24 * HOURS)
+        })
+        .catch((err) => warn('message not sent: %o', err))
+      }
     }
   })
 }
@@ -74,14 +100,57 @@ const adminCommands = (cmd, evt, reply) => {
     case 'adminsay':
       if (evt.args.length <= 0) return reply(cursive('please specify a message, e.g. /adminsay message'))
       sendToAll(htmlMessage('<i>the </i><b>admins</b><i> shout from the heavens:</i> ' + evt.args.join(' ')))
+      break
   }
 }
 
+const getFromCache = (evt, reply) => {
+  if (!evt || !evt.raw || !evt.raw.reply_to_message) return reply(cursive('please reply to a message to ban the user who posted it'))
+
+  const messageRepliedTo = messageHistory[evt.raw.reply_to_message.message_id]
+  if (!messageRepliedTo) return reply(cursive('sender not found in cache (it\'s been more than 24h or the bot has been restarted since the post)'))
+
+  return messageRepliedTo
+}
+
 const modCommands = (cmd, evt, reply) => {
+  let messageRepliedTo // TODO: put every command into a separate function
   switch (cmd) {
     case 'modsay':
       if (evt.args.length <= 0) return reply(cursive('please specify a message, e.g. /modsay message'))
       sendToAll(htmlMessage('<i>the </i><b>mods</b><i> shout from the heavens:</i> ' + evt.args.join(' ')))
+      break
+    case 'info':
+      if (evt && evt.raw && evt.raw.reply_to_message) {
+        messageRepliedTo = getFromCache(evt, reply)
+        if (!messageRepliedTo) {
+          if (evt.args.length >= 1) {
+            reply({
+              type: 'message',
+              text: infoText(getUserByUsername(evt.args[0])),
+              options: {
+                parse_mode: 'HTML'
+              }
+            })
+          }
+        } else {
+          const user = getUser(messageRepliedTo.sender)
+          reply({
+            type: 'message',
+            text: modInfoText(user),
+            options: {
+              parse_mode: 'HTML'
+            }
+          })
+        }
+      }
+      break
+    case 'warn':
+      messageRepliedTo = getFromCache(evt, reply)
+      const result = warnUser(messageRepliedTo.sender)
+      reply(htmlMessage('<i>warned user, has</i> <b>' + result.warnings + '</b> <i>warnings now</i>'))
+      // TODO: also kick user here
+      break
     // case 'ban':
     //   // TODO: make this accessible by replying to one of the bots messages and doing /ban
   }
@@ -108,14 +177,16 @@ const commands = (cmd, evt, reply) => {
       reply(users.length + ' users: ' + users.map(getUsername).join(', '))
       break
     case 'info':
-      reply({
-        type: 'message',
-        user: evt.user,
-        text: `<b>id:</b> ${user.id}, <b>username:</b> @${user.username}, <b>rank:</b> ${user.rank} (${getRank(user.rank)})`,
-        options: {
-          parse_mode: 'HTML'
-        }
-      })
+      if (!(evt && evt.raw && evt.raw.reply_to_message) && evt.args.length === 0) {
+        reply({
+          type: 'message',
+          user: evt.user,
+          text: infoText(user),
+          options: {
+            parse_mode: 'HTML'
+          }
+        })
+      }
       break
     case 'debug':
       const newDebugMode = !user.debug

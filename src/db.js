@@ -9,6 +9,13 @@ export const addUser = (id, username) => db.get('users').push({ id, username, ra
 export const delUser = (id) => db.get('users').remove({ id }).value()
 export const getUsers = () => db.get('users').value()
 
+const getUserWarnings = (id) => {
+  const user = getUser(id)
+  if (!user || !user.warnings) return 0
+  else return user.warnings
+}
+
+export const warnUser = (id) => db.get('users').find({ id }).assign({ warnings: getUserWarnings(id) + 1 }).value()
 export const setRank = (id, rank) => db.get('users').find({ id }).assign({ rank }).value()
 export const setDebugMode = (id, val) => db.get('users').find({ id }).assign({ debug: val }).value()
 
