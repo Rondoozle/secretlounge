@@ -6,16 +6,12 @@ info(`secretlounge v${version} starting`)
 
 import config from '../config.json'
 
-import { connect } from '../../../caffeinery/coffea/src/index'
-import telegram from '../../../caffeinery/coffea-telegram/src/index'
-const networks = connect({
-  "protocol": telegram,
-  "token": "163546282:AAE_d45ZYlB-eOTyHq9Ouqd5-K4WsRoDKtA"
-})
+import { connect } from 'coffea'
+const networks = connect(config)
 
 import {
-  getUser, getUserByUsername, addUser, delUser, getUsers,
-  setRank, setDebugMode, warnUser,
+  getUser, getUserByUsername, addUser, delUser, getUsers, rejoinUser,
+  setRank, setDebugMode, warnUser, kickUser, banUser, isActive,
   getSystemConfig, setMotd
 } from './db'
 import {
@@ -44,7 +40,6 @@ const sendToAll = (rawEvent) => {
         // store message in history
         promises && promises[0] && promises[0].then((msg) => {
           messageHistory[msg.message_id] = { sender: evt.user }
-          console.log('storing', msg.message_id, '->', messageHistory[msg.message_id])
           setTimeout(() => {
             delete messageHistory[msg.message_id]
           }, 24 * HOURS)
@@ -58,7 +53,8 @@ const sendToAll = (rawEvent) => {
 const relay = (type) => {
   networks.on(type, (evt, reply) => {
     if (type !== 'message' || (evt && evt.text && evt.text.charAt(0) !== '/')) { // don't parse commands again
-      if (getUser(evt.user)) { // make sure user is in the group chat
+      const user = getUser(evt.user)
+      if (user && isActive(user)) { // make sure user is in the group chat
         // otherwise, relay event to all users
         sendToAll(evt)
       } else {
@@ -114,7 +110,7 @@ const getFromCache = (evt, reply) => {
 }
 
 const modCommands = (cmd, evt, reply) => {
-  let messageRepliedTo // TODO: put every command into a separate function
+  let messageRepliedTo, result // TODO: put every command into a separate function
   switch (cmd) {
     case 'modsay':
       if (evt.args.length <= 0) return reply(cursive('please specify a message, e.g. /modsay message'))
@@ -147,12 +143,22 @@ const modCommands = (cmd, evt, reply) => {
       break
     case 'warn':
       messageRepliedTo = getFromCache(evt, reply)
-      const result = warnUser(messageRepliedTo.sender)
+      result = warnUser(messageRepliedTo.sender)
       reply(htmlMessage('<i>warned user, has</i> <b>' + result.warnings + '</b> <i>warnings now</i>'))
-      // TODO: also kick user here
       break
-    // case 'ban':
-    //   // TODO: make this accessible by replying to one of the bots messages and doing /ban
+    case 'kick':
+      messageRepliedTo = getFromCache(evt, reply)
+      result = warnUser(messageRepliedTo.sender)
+      kickUser(messageRepliedTo.sender)
+      reply(htmlMessage('<i>kicked user, has</i> <b>' + result.warnings + '</b> <i>warnings now</i>'))
+      break
+    case 'ban':
+      messageRepliedTo = getFromCache(evt, reply)
+      result = warnUser(messageRepliedTo.sender)
+      kickUser(messageRepliedTo.sender)
+      banUser(messageRepliedTo.sender)
+      reply(htmlMessage('<i>banned user, has</i> <b>' + result.warnings + '</b> <i>warnings now</i>'))
+      break
   }
 }
 
@@ -206,27 +212,33 @@ networks.on('command', (evt, reply) => {
   log('Received command event: %o', evt)
 
   const cmd = evt.cmd.toLowerCase()
+  const user = getUser(evt.user)
 
   if (cmd === 'start') {
-    if (getUser(evt.user)) return reply('You\'re already in the chat!')
-    else {
-      const username = getUsernameFromEvent(evt)
+    const username = getUsernameFromEvent(evt)
+
+    if (user && isActive(user)) return reply('You\'re already in the chat!')
+    else if (user && user.banned) return reply('You\'re banned from this chat!')
+    else if (user && user.kicked) {
+      rejoinUser(evt.user)
+    } else {
       addUser(evt.user, username)
-      sendToAll({
-        type: 'message',
-        user: evt.user,
-        text: '@' + username + ' <i>joined the chat</i>',
-        options: {
-          parse_mode: 'HTML'
-        }
-      })
-
-      // make first user admin
-      if (getUsers().length === 1) setRank(evt.user, RANKS.admin)
-
-      const motd = getSystemConfig().motd
-      if (motd) reply(motd)
     }
+
+    sendToAll({
+      type: 'message',
+      user: evt.user,
+      text: '@' + username + ' <i>joined the chat</i>',
+      options: {
+        parse_mode: 'HTML'
+      }
+    })
+
+    // make first user admin
+    if (getUsers().length === 1) setRank(evt.user, RANKS.admin)
+
+    const motd = getSystemConfig().motd
+    if (motd) reply(motd)
   } else {
     const user = getUser(evt.user)
     if (!user) return reply(NOT_IN_CHAT)

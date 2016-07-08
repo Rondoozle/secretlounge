@@ -40,9 +40,11 @@ const obfuscateId = (id) =>
 export const infoText = (user) => !user ? '<i>user not found</i>' :
   `<b>id:</b> ${obfuscateId(user.id)}, <b>username:</b> @${user.username}, ` +
   `<b>rank:</b> ${user.rank} (${getRank(user.rank)}), ` +
-  `<b>warnings:</b> ${user.warnings || 0} ${generateSmiley(user.warnings)}`
+  `<b>warnings:</b> ${user.warnings || 0} ${generateSmiley(user.warnings)}, ` +
+  `<b>kicked:</b> ${user.kicked ? 'yes' : 'no'}, <b>banned:</b> ${user.banned ? 'yes' : 'no'}`
 
 export const modInfoText = (user) => !user ? '<i>user not found</i>' :
   `<b>id:</b> ${obfuscateId(user.id)}, <b>username:</b> anon, ` +
   `<b>rank:</b> ???, ` +
-  `<b>warnings:</b> ${user.warnings || 0} ${generateSmiley(user.warnings)}`
+  `<b>warnings:</b> ${user.warnings || 0} ${generateSmiley(user.warnings)}, ` +
+  `<b>kicked:</b> ${user.kicked ? 'yes' : 'no'}, <b>banned:</b> ${user.banned ? 'yes' : 'no'}`

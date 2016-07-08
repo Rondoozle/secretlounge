@@ -6,6 +6,7 @@ db.defaults({ users: [], system: {} }).value()
 export const getUser = (id) => db.get('users').find({ id }).value()
 export const getUserByUsername = (username) => db.get('users').find({ username }).value()
 export const addUser = (id, username) => db.get('users').push({ id, username, rank: 0 }).value()
+export const rejoinUser = (id) => db.get('users').find({ id }).assign({ kicked: false }).value()
 export const delUser = (id) => db.get('users').remove({ id }).value()
 export const getUsers = () => db.get('users').value()
 
@@ -16,6 +17,13 @@ const getUserWarnings = (id) => {
 }
 
 export const warnUser = (id) => db.get('users').find({ id }).assign({ warnings: getUserWarnings(id) + 1 }).value()
+export const kickUser = (id) => db.get('users').find({ id }).assign({ kicked: true }).value()
+export const banUser = (id) => db.get('users').find({ id }).assign({ banned: true }).value()
+
+// TODO: ban for certain time
+
+export const isActive = (user) => user && !user.kicked && !user.banned
+
 export const setRank = (id, rank) => db.get('users').find({ id }).assign({ rank }).value()
 export const setDebugMode = (id, val) => db.get('users').find({ id }).assign({ debug: val }).value()
 
