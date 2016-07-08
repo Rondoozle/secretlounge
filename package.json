@@ -1,6 +1,6 @@
 {
   "name": "coffea-starter",
-  "version": "1.0.0-beta",
+  "version": "0.2.0-beta",
   "description": "coffea starter kit / boilerplate to quickly develop a chat bot",
   "bin": {
     "bot": "build/index.js"
