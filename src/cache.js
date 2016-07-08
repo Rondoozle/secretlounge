@@ -5,10 +5,16 @@ import { cursive } from './messages'
 let messageHistory = {}
 
 export const getFromCache = (evt, reply) => {
-  if (!evt || !evt.raw || !evt.raw.reply_to_message) return reply(cursive('please reply to a message to ban the user who posted it'))
+  if (!evt || !evt.raw || !evt.raw.reply_to_message) {
+    reply(cursive('please reply to a message to ban the user who posted it'))
+    return false
+  }
 
   const messageRepliedTo = messageHistory[evt.raw.reply_to_message.message_id]
-  if (!messageRepliedTo) return reply(cursive('sender not found in cache (it\'s been more than 24h or the bot has been restarted since the post)'))
+  if (!messageRepliedTo) {
+    reply(cursive('sender not found in cache (it\'s been more than 24h or the bot has been restarted since the post)'))
+    return false
+  }
 
   return messageRepliedTo
 }
