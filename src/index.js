@@ -6,12 +6,8 @@ info(`secretlounge v${version} starting`)
 
 import config from '../config.json'
 
-import { connect } from '../../../caffeinery/coffea/src/index'
-import telegram from '../../../caffeinery/coffea-telegram/src/index'
-const networks = connect({
-  "protocol": telegram,
-  "token": "163546282:AAE_d45ZYlB-eOTyHq9Ouqd5-K4WsRoDKtA"
-})
+import { connect } from 'coffea'
+const networks = connect(config)
 
 import {
   htmlMessage, cursive,
