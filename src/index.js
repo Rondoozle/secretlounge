@@ -26,17 +26,28 @@ const SECONDS = 1000
 const MINUTES = 60 * SECONDS
 const HOURS = 60 * MINUTES
 
-export const sendToAll = (rawEvent) => {
-  let evt
-  if (typeof rawEvent === 'string') evt = { type: 'message', text: rawEvent }
-  else evt = rawEvent
+const parseEvent = (rawEvent) => {
+  if (typeof rawEvent === 'string') return { type: 'message', text: rawEvent }
+  else return rawEvent
+}
 
+export const sendToUser = (id, rawEvent) => {
+  const evt = parseEvent(rawEvent)
+  networks.send({
+    ...evt,
+    chat: id
+  })
+}
+
+export const sendToAll = (rawEvent) => {
+  const evt = parseEvent(rawEvent)
   getUsers().map((user) => {
     if (user.debug || user.id !== evt.user) { // don't relay back to sender
       const promises = networks.send({
         ...evt,
         chat: user.id,
         options: {
+          ...evt.options,
           reply_to_message_id: evt && evt.raw && evt.raw.reply_to_message && evt.raw.reply_to_message.message_id
         }
       })

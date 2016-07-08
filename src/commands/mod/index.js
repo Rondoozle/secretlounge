@@ -1,7 +1,7 @@
 import dude from 'debug-dude'
 const { /*debug, log,*/ info /*, warn, error*/ } = dude('bot:commands:mod')
 
-import { sendToAll } from '../../index'
+import { sendToAll, sendToUser } from '../../index'
 import {
   cursive, htmlMessage,
   modInfoText
@@ -52,6 +52,13 @@ export default function modCommands (user, evt, reply) {
       messageRepliedTo = getFromCache(evt, reply)
       const warnResult = warnUser(messageRepliedTo.sender)
       info('%o warned user %s -> %o', user, messageRepliedTo.sender, warnResult)
+      sendToUser(messageRepliedTo.sender, {
+        ...htmlMessage('<i>you\'ve been warned, use</i> /info <i>to check your warnings</i>'),
+        options: {
+          reply_to_message_id: evt.raw.reply_to_message.message_id,
+          parse_mode: 'HTML'
+        }
+      })
       reply(htmlMessage('<i>warned user, has</i> <b>' + warnResult.warnings + '</b> <i>warnings now</i>'))
       break
 
@@ -60,6 +67,13 @@ export default function modCommands (user, evt, reply) {
       const kickResult = warnUser(messageRepliedTo.sender)
       kickUser(messageRepliedTo.sender)
       info('%o kicked user %s -> %o', user, messageRepliedTo.sender, kickResult)
+      sendToUser(messageRepliedTo.sender, {
+        ...htmlMessage('<i>you\'ve been kicked, use</i> /start <i>to rejoin</i>'),
+        options: {
+          reply_to_message_id: evt.raw.reply_to_message.message_id,
+          parse_mode: 'HTML'
+        }
+      })
       reply(htmlMessage('<i>kicked user, has</i> <b>' + kickResult.warnings + '</b> <i>warnings now</i>'))
       break
 
@@ -72,6 +86,13 @@ export default function modCommands (user, evt, reply) {
       kickUser(messageRepliedTo.sender)
       banUser(messageRepliedTo.sender)
       info('%o banned user %s -> %o', user, messageRepliedTo.sender, warnResult)
+      sendToUser(messageRepliedTo.sender, {
+        ...htmlMessage('<i>you\'ve been banned</i>'),
+        options: {
+          reply_to_message_id: evt.raw.reply_to_message.message_id,
+          parse_mode: 'HTML'
+        }
+      })
       reply(htmlMessage('<i>banned user, has</i> <b>' + banResult.warnings + '</b> <i>warnings now</i>'))
       break
   }

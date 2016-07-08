@@ -1,5 +1,7 @@
 import { cursive } from './messages'
 
+// TODO: this doesn't work in production mode
+
 let messageHistory = {}
 
 export const getFromCache = (evt, reply) => {
