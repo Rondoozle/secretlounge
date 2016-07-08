@@ -1,3 +1,6 @@
+import dude from 'debug-dude'
+const { /*debug, log,*/ info /*, warn, error*/ } = dude('bot:commands:mod')
+
 import { sendToAll } from '../../index'
 import {
   cursive, htmlMessage,
@@ -29,6 +32,7 @@ export default function modCommands (user, evt, reply) {
 
     case 'modsay':
       if (evt.args.length <= 0) return reply(cursive('please specify a message, e.g. /modsay message'))
+      info('%o sent mod message -> %s', user, evt.args.join(' '))
       sendToAll(htmlMessage('<i>the </i><b>mods</b><i> shout from the heavens:</i> ' + evt.args.join(' ')))
       break
 
@@ -47,6 +51,7 @@ export default function modCommands (user, evt, reply) {
     case 'warn':
       messageRepliedTo = getFromCache(evt, reply)
       const warnResult = warnUser(messageRepliedTo.sender)
+      info('%o warned user %s -> %o', user, messageRepliedTo.sender, warnResult)
       reply(htmlMessage('<i>warned user, has</i> <b>' + warnResult.warnings + '</b> <i>warnings now</i>'))
       break
 
@@ -54,6 +59,7 @@ export default function modCommands (user, evt, reply) {
       messageRepliedTo = getFromCache(evt, reply)
       const kickResult = warnUser(messageRepliedTo.sender)
       kickUser(messageRepliedTo.sender)
+      info('%o kicked user %s -> %o', user, messageRepliedTo.sender, kickResult)
       reply(htmlMessage('<i>kicked user, has</i> <b>' + kickResult.warnings + '</b> <i>warnings now</i>'))
       break
 
@@ -65,6 +71,7 @@ export default function modCommands (user, evt, reply) {
       const banResult = warnUser(messageRepliedTo.sender)
       kickUser(messageRepliedTo.sender)
       banUser(messageRepliedTo.sender)
+      info('%o banned user %s -> %o', user, messageRepliedTo.sender, warnResult)
       reply(htmlMessage('<i>banned user, has</i> <b>' + banResult.warnings + '</b> <i>warnings now</i>'))
       break
   }
