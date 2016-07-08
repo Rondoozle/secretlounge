@@ -52,3 +52,22 @@ npm run watch
 ```
 
 To automatically restart the bot when the code changes.
+
+
+## Commands List
+
+List of commands for [@botfather](https://telegram.me/botfather):
+
+```
+start - join the chat (start receiving messages)
+stop - leave the chat (stop receiving messages)
+users - get list of users
+info - get info about your account
+motd - show the welcome message
+source - get the source code of this bot
+version - show the version of this bot
+issues - report issues with this bot
+modhelp - show commands for mods
+adminhelp - show commands for admins
+debug - toggle debug mode (sends back all messages to you)
+```
