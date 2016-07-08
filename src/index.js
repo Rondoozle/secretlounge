@@ -33,7 +33,13 @@ export const sendToAll = (rawEvent) => {
 
   getUsers().map((user) => {
     if (user.debug || user.id !== evt.user) { // don't relay back to sender
-      const promises = networks.send({ ...evt, chat: user.id })
+      const promises = networks.send({
+        ...evt,
+        chat: user.id,
+        options: {
+          reply_to_message_id: evt && evt.raw && evt.raw.reply_to_message && evt.raw.reply_to_message.message_id
+        }
+      })
       if (evt.user) {
         // store message in history
         promises && promises[0] && promises[0].then((msg) => {
