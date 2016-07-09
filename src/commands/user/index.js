@@ -41,6 +41,11 @@ export default function userCommands (user, evt, reply) {
       }
       break
 
+    case 'sign':
+    case 's':
+      reply(cursive('this command has been disabled'))
+      break
+
     case 'debug':
       const newDebugMode = !user.debug
       setDebugMode(evt.user, newDebugMode)

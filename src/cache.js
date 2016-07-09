@@ -1,6 +1,6 @@
 import { cursive } from './messages'
 
-// TODO: this doesn't work in production mode
+// TODO: use a better caching method
 
 let messageHistory = {}
 
