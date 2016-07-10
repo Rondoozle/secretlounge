@@ -1,7 +1,7 @@
 import dude from 'debug-dude'
 const { /*debug, log,*/ info /*, warn, error*/ } = dude('bot:commands:admin')
 
-import { sendToAll } from '../../index'
+import { sendToAll, sendToUser } from '../../index'
 import {
   cursive, htmlMessage,
   configSet
