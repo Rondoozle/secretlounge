@@ -11,7 +11,8 @@ const networks = connect(config)
 
 import {
   htmlMessage, cursive,
-  getUsernameFromEvent, getRealnameFromEvent,
+  getUsername, getUsernameFromEvent, getRealnameFromEvent,
+  stringifyTimestamp,
   USER_NOT_IN_CHAT, USER_IN_CHAT, USER_BANNED_FROM_CHAT, USER_JOINED_CHAT
 } from './messages'
 import { RANKS } from './ranks'
@@ -21,10 +22,7 @@ import {
   getSystemConfig
 } from './db'
 import commands from './commands'
-
-const SECONDS = 1000
-const MINUTES = 60 * SECONDS
-const HOURS = 60 * MINUTES
+import { HOURS } from './time'
 
 const parseEvent = (rawEvent) => {
   if (typeof rawEvent === 'string') return { type: 'message', text: rawEvent }
@@ -81,6 +79,18 @@ const relay = (type) => {
 
 ['message', 'audio', 'document', 'photo', 'sticker', 'video', 'voice'].map(relay)
 
+const updateUserFromEvent = (evt) => {
+  const user = getUser(evt.user)
+  if (user) {
+    if (evt && evt.raw && evt.raw.from) {
+      return updateUser(user.id, {
+        username: getUsernameFromEvent(evt),
+        realname: getRealnameFromEvent(evt)
+      })
+    } else warn('user detected, but no `from` information in message!')
+  }
+}
+
 networks.on('command', (evt, reply) => {
   log('received command event: %o', evt)
 
@@ -89,12 +99,15 @@ networks.on('command', (evt, reply) => {
 
   if (evt && evt.cmd === 'start') { // user (re)joining chat
     if (user && isActive(user)) return reply(cursive(USER_IN_CHAT))
-    else if (user && user.banned) return reply(cursive(USER_BANNED_FROM_CHAT))
-    else if (user && user.kicked) rejoinUser(evt.user)
-    else addUser(evt.user, getUsernameFromEvent(evt))
+    else if (user && user.banned >= Date.now()) {
+      return reply(cursive(USER_BANNED_FROM_CHAT + ' until ' + stringifyTimestamp(user.banned)))
+    }
+    else if (user && (user.kicked || user.banned)) rejoinUser(evt.user)
+    else addUser(evt.user)
+    const newUser = updateUserFromEvent(evt)
 
     sendToAll(htmlMessage(
-      `@${getUsernameFromEvent(evt)} <i>${USER_JOINED_CHAT}</i>`
+      `${getUsername(newUser)} <i>${USER_JOINED_CHAT}</i>`
     ))
 
     // make first user admin
@@ -109,14 +122,4 @@ networks.on('command', (evt, reply) => {
   }
 })
 
-networks.on('message', (evt) => {
-  const user = getUser(evt.user)
-  if (user) {
-    if (evt && evt.raw && evt.raw.from) {
-      updateUser(user.id, {
-        username: getUsernameFromEvent(evt),
-        realname: getRealnameFromEvent(evt)
-      })
-    } else warn('user detected, but no `from` information in message!')
-  }
-})
+networks.on('message', updateUserFromEvent)

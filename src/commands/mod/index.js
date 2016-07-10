@@ -77,12 +77,12 @@ export default function modCommands (user, evt, reply) {
       messageRepliedTo = getFromCache(evt, reply)
       if (messageRepliedTo) {
         const repliedToUser = getUser(messageRepliedTo.sender)
-        if (repliedToUser.rank >= RANKS.user) return reply(cursive('you can\'t ban mods or admins'))
+        // if (repliedToUser.rank >= RANKS.user) return reply(cursive('you can\'t ban mods or admins'))
 
         const banResult = warnUser(messageRepliedTo.sender)
         kickUser(messageRepliedTo.sender)
         banUser(messageRepliedTo.sender)
-        info('%o banned user %s -> %o', user, messageRepliedTo.sender, warnResult)
+        info('%o banned user %s -> %o', user, messageRepliedTo.sender, banResult)
         sendToUser(messageRepliedTo.sender, {
           ...htmlMessage('<i>you\'ve been banned' + getReason(evt) + '</i>'),
           options: {

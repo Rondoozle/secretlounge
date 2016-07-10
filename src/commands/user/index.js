@@ -1,7 +1,7 @@
 import { sendToAll } from '../../index'
 import {
   cursive, htmlMessage,
-  getUsernameFromEvent,
+  getUsername,
   infoText, configSet, usersText,
   USER_NOT_IN_CHAT, USER_LEFT_CHAT
 } from '../../messages'
@@ -37,7 +37,7 @@ export default function userCommands (user, evt, reply) {
       if (!user) return reply(cursive(USER_NOT_IN_CHAT))
       delUser(evt.user)
       sendToAll(htmlMessage(
-        `@${getUsernameFromEvent(evt)} <i>${USER_LEFT_CHAT}</i>`
+        `${getUsername(user)} <i>${USER_LEFT_CHAT}</i>`
       ))
       break
 

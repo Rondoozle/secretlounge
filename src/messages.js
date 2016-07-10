@@ -2,7 +2,7 @@ import { getRank } from './ranks'
 
 export const USER_NOT_IN_CHAT = 'you\'re not in the chat yet! Use </i>/start<i> to join'
 export const USER_IN_CHAT = 'you\'re already in the chat!'
-export const USER_BANNED_FROM_CHAT = 'you\'re banned from this chat!'
+export const USER_BANNED_FROM_CHAT = 'you\'re banned from this chat'
 export const USER_LEFT_CHAT = 'left the chat'
 export const USER_JOINED_CHAT = 'joined the chat'
 
@@ -55,10 +55,12 @@ export const getRealnameFromEvent = (evt) => {
 
 export const getUsernameFromEvent = (evt) => {
   if (evt && evt.raw && evt.raw.from) {
-    const { username } = evt.raw.from
-    return username ? username : getRealnameFromEvent(evt)
+    return evt.raw.from.username
   }
 }
+
+export const stringifyTimestamp = (ts) =>
+  (new Date(ts)).toUTCString()
 
 export const usersText = (users) =>
   `<b>${users.length}</b> <i>users:</i> ` + users.map(getUsername).join(', ')
@@ -67,10 +69,10 @@ export const infoText = (user) => !user ? '<i>user not found</i>' :
   `<b>id:</b> ${obfuscateId(user.id)}, <b>username:</b> @${user.username}, ` +
   `<b>rank:</b> ${user.rank} (${getRank(user.rank)}), ` +
   `<b>warnings:</b> ${user.warnings || 0} ${generateSmiley(user.warnings)}, ` +
-  `<b>kicked:</b> ${user.kicked ? 'yes' : 'no'}, <b>banned:</b> ${user.banned ? 'yes' : 'no'}`
+  `<b>kicked:</b> ${user.kicked ? 'yes' : 'no'}, <b>banned:</b> ${user.banned ? stringifyTimestamp(user.banned) : 'no'}`
 
 export const modInfoText = (user) => !user ? '<i>user not found</i>' :
   `<b>id:</b> ${obfuscateId(user.id)}, <b>username:</b> anon, ` +
   `<b>rank:</b> ???, ` +
   `<b>warnings:</b> ${user.warnings || 0} ${generateSmiley(user.warnings)}, ` +
-  `<b>kicked:</b> ${user.kicked ? 'yes' : 'no'}, <b>banned:</b> ${user.banned ? 'yes' : 'no'}`
+  `<b>kicked:</b> ${user.kicked ? 'yes' : 'no'}, <b>banned:</b> ${user.banned ? stringifyTimestamp(user.banned) : 'no'}`
