@@ -13,6 +13,11 @@ import {
 } from '../../db'
 import { RANKS } from '../../ranks'
 
+const getReason = (evt) =>
+  evt.args.length > 0
+  ? ' (' + evt.args.join(' ') + ')'
+  : ''
+
 export default function modCommands (user, evt, reply) {
   let messageRepliedTo
 
@@ -41,7 +46,7 @@ export default function modCommands (user, evt, reply) {
         const warnResult = warnUser(messageRepliedTo.sender)
         info('%o warned user %s -> %o', user, messageRepliedTo.sender, warnResult)
         sendToUser(messageRepliedTo.sender, {
-          ...htmlMessage('<i>you\'ve been warned, use</i> /info <i>to check your warnings</i>'),
+          ...htmlMessage('<i>you\'ve been warned' + getReason(evt) + ', use</i> /info <i>to check your warnings</i>'),
           options: {
             reply_to_message_id: evt.raw.reply_to_message.message_id,
             parse_mode: 'HTML'
@@ -58,7 +63,7 @@ export default function modCommands (user, evt, reply) {
         kickUser(messageRepliedTo.sender)
         info('%o kicked user %s -> %o', user, messageRepliedTo.sender, kickResult)
         sendToUser(messageRepliedTo.sender, {
-          ...htmlMessage('<i>you\'ve been kicked, use</i> /start <i>to rejoin</i>'),
+          ...htmlMessage('<i>you\'ve been kicked' + getReason(evt) + ', use</i> /start <i>to rejoin</i>'),
           options: {
             reply_to_message_id: evt.raw.reply_to_message.message_id,
             parse_mode: 'HTML'
@@ -79,7 +84,7 @@ export default function modCommands (user, evt, reply) {
         banUser(messageRepliedTo.sender)
         info('%o banned user %s -> %o', user, messageRepliedTo.sender, warnResult)
         sendToUser(messageRepliedTo.sender, {
-          ...htmlMessage('<i>you\'ve been banned</i>'),
+          ...htmlMessage('<i>you\'ve been banned' + getReason(evt) + '</i>'),
           options: {
             reply_to_message_id: evt.raw.reply_to_message.message_id,
             parse_mode: 'HTML'
