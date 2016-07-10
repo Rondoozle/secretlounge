@@ -25,6 +25,9 @@ export default function adminCommands (user, evt, reply) {
       const newMod = getUserByUsername(evt.args[0])
       setRank(newMod.id, RANKS.mod)
       info('%o made %o mod', user, newMod)
+      sendToUser(newMod.id,
+        htmlMessage('<i>you\'ve been promoted to mod, run</i> /modhelp <i>for a list of commands</i>')
+      )
       reply(htmlMessage(`<i>made</i> @${evt.args[0]} <i>a moderator</i>`))
       break
 
@@ -33,6 +36,9 @@ export default function adminCommands (user, evt, reply) {
       const newAdmin = getUserByUsername(evt.args[0])
       setRank(newAdmin.id, RANKS.admin)
       info('%o made %o admin', user, newAdmin)
+      sendToUser(newAdmin.id,
+        htmlMessage('<i>you\'ve been promoted to admin, run</i> /adminhelp <i>for a list of commands</i>')
+      )
       reply(htmlMessage(`<i>made</> @${evt.args[0]} <i>an admin</i>`))
       break
 
