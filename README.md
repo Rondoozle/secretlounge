@@ -63,6 +63,7 @@ start - join the chat (start receiving messages)
 stop - leave the chat (stop receiving messages)
 users - get list of users
 info - get info about your account
+sign - send your real telegram username
 motd - show the welcome message
 source - get the source code of this bot
 version - show the version of this bot
