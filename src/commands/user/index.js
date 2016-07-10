@@ -64,6 +64,7 @@ export default function userCommands (user, evt, reply) {
       }
       break
 
+    case 's':
     case 'sign':
       sendToAll({
         type: 'message',
