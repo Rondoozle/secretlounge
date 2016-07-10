@@ -11,16 +11,6 @@ import { RANKS } from '../../ranks'
 
 export default function adminCommands (user, evt, reply) {
   switch (evt.cmd) {
-    case 'adminhelp':
-      reply(htmlMessage(`
-<i>you can use the following commands:</i>
-  /adminhelp - show this info
-  /adminsay [message] - send an official moderator message
-  /motd [message] - set the message of the day
-  /mod [username] - grant a user moderator rank
-  /admin [username] - grand a user admin rank`))
-      break
-
     case 'motd':
       const motd = evt.args.join(' ')
       if (motd) {
