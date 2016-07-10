@@ -45,7 +45,7 @@ export default function adminCommands (user, evt, reply) {
     case 'adminsay':
       if (evt.args.length <= 0) return reply(htmlMessage('<i>please specify a message, e.g. </i>/adminsay message'))
       info('%o sent admin message -> %s', user, evt.args.join(' '))
-      sendToAll(htmlMessage('<i>the </i><b>admins</b><i> shout from the heavens:</i> ' + evt.args.join(' ')))
+      sendToAll(htmlMessage(evt.args.join(' ') + ' <b>~admins</b>'))
       break
   }
 }

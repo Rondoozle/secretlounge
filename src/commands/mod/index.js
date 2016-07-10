@@ -25,7 +25,7 @@ export default function modCommands (user, evt, reply) {
     case 'modsay':
       if (evt.args.length <= 0) return reply(cursive('please specify a message, e.g. /modsay message'))
       info('%o sent mod message -> %s', user, evt.args.join(' '))
-      sendToAll(htmlMessage('<i>the </i><b>mods</b><i> shout from the heavens:</i> ' + evt.args.join(' ')))
+      sendToAll(htmlMessage(evt.args.join(' ') + ' <b>~mods</b>'))
       break
 
     case 'info':
