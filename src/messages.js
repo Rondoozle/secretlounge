@@ -1,4 +1,5 @@
 import { getRank } from './ranks'
+import { DAYS } from './time'
 
 export const USER_NOT_IN_CHAT = 'you\'re not in the chat yet! Use </i>/start<i> to join'
 export const USER_IN_CHAT = 'you\'re already in the chat!'
@@ -38,8 +39,11 @@ export const generateSmiley = (warnings) => {
   else return `:'(`
 }
 
+const idSalt = () =>
+  Math.floor(Date.now() / DAYS)
+
 const obfuscateId = (id) =>
-  id.toString(32)
+  Math.floor((id / idSalt()) * 100000).toString(32)
 
 export const getUsername = (user) => {
   const rank = user.rank > 0 ? ' (' + getRank(user.rank) + ')' : ''
