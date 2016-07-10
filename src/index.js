@@ -91,6 +91,20 @@ const updateUserFromEvent = (evt) => {
   }
 }
 
+const showChangelog = (evt, reply) => {
+  const user = getUser(evt.user)
+  if (user) {
+    if (user.version !== version) {
+      updateUser(user.id, { version })
+      const tag = 'v' + version.split('-').shift()
+      reply(htmlMessage(
+        `<i>a new version has been released (</i><b>${version}</b><i>), ` +
+        `check out</i> https://github.com/6697/secretlounge/releases/tag/${tag}`
+      ))
+    }
+  }
+}
+
 networks.on('command', (evt, reply) => {
   log('received command event: %o', evt)
 
@@ -122,4 +136,7 @@ networks.on('command', (evt, reply) => {
   }
 })
 
-networks.on('message', updateUserFromEvent)
+networks.on('message', (evt, reply) => {
+  updateUserFromEvent(evt)
+  showChangelog(evt, reply)
+})

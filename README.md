@@ -67,6 +67,7 @@ motd - show the welcome message
 source - get the source code of this bot
 version - show the version of this bot
 issues - report issues with this bot
+changelog - show the release history
 modhelp - show commands for mods
 adminhelp - show commands for admins
 debug - toggle debug mode (sends back all messages to you)
