@@ -9,6 +9,7 @@ export const addUser = (id, username) => db.get('users').push({ id, username, ra
 export const rejoinUser = (id) => db.get('users').find({ id }).assign({ kicked: false }).value()
 export const delUser = (id) => db.get('users').remove({ id }).value()
 export const getUsers = () => db.get('users').value()
+export const updateUser = (id, data) => db.get('users').find({ id }).assign(data).value()
 
 const getUserWarnings = (id) => {
   const user = getUser(id)

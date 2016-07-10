@@ -41,14 +41,24 @@ export const generateSmiley = (warnings) => {
 const obfuscateId = (id) =>
   id.toString(32)
 
-// TODO: use full name if username is not available
 export const getUsername = (user) => {
   const rank = user.rank > 0 ? ' (' + getRank(user.rank) + ')' : ''
-  return '@' + user.username + rank
+  return (user.username ? '@' + user.username : user.realname) + rank
 }
 
-export const getUsernameFromEvent = (evt) =>
-  evt.raw && evt.raw.from && evt.raw.from.username
+export const getRealnameFromEvent = (evt) => {
+  if (evt && evt.raw && evt.raw.from) {
+    const { first_name, last_name } = evt.raw.from
+    return [first_name, last_name].filter(i => i).join(' ')
+  }
+}
+
+export const getUsernameFromEvent = (evt) => {
+  if (evt && evt.raw && evt.raw.from) {
+    const { username } = evt.raw.from
+    return username ? username : getRealnameFromEvent(evt)
+  }
+}
 
 export const usersText = (users) =>
   `<b>${users.length}</b> <i>users:</i> ` + users.map(getUsername).join(', ')

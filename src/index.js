@@ -11,13 +11,13 @@ const networks = connect(config)
 
 import {
   htmlMessage, cursive,
-  getUsernameFromEvent,
+  getUsernameFromEvent, getRealnameFromEvent,
   USER_NOT_IN_CHAT, USER_IN_CHAT, USER_BANNED_FROM_CHAT, USER_JOINED_CHAT
 } from './messages'
 import { RANKS } from './ranks'
 import { setCache, delCache } from './cache'
 import {
-  getUser, getUsers, setRank, isActive, addUser, rejoinUser,
+  getUser, getUsers, setRank, isActive, addUser, rejoinUser, updateUser,
   getSystemConfig
 } from './db'
 import commands from './commands'
@@ -106,5 +106,17 @@ networks.on('command', (evt, reply) => {
     if (!user) return reply(cursive(USER_NOT_IN_CHAT))
 
     commands(user, evt, reply)
+  }
+})
+
+networks.on('message', (evt) => {
+  const user = getUser(evt.user)
+  if (user) {
+    if (evt && evt.raw && evt.raw.from) {
+      updateUser(user.id, {
+        username: getUsernameFromEvent(evt),
+        realname: getRealnameFromEvent(evt)
+      })
+    } else warn('user detected, but no `from` information in message!')
   }
 })
