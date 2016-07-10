@@ -54,9 +54,15 @@ npm run watch
 To automatically restart the bot when the code changes.
 
 
-## Commands List
+## @botfather setup
 
-List of commands for [@botfather](https://telegram.me/botfather):
+Message [@botfather](https://telegram.me/botfather) to change your bot config:
+
+ * Run `/setprivacy`, select your bot and `Enable` it.
+ * Run `/setjoingroups`, select your bot and `Disable` it.
+ * Run `/setcommands`, select your bot and paste the command list below.
+
+### Command list
 
 ```
 start - join the chat (start receiving messages)
