@@ -57,7 +57,11 @@ export const sendToAll = (rawEvent) => {
             delCache(msg.message_id)
           }, 24 * HOURS)
         })
-        .catch((err) => warn('message not sent: %o', err))
+        .catch((err) => {
+          if (err.description !== 'Bot was blocked by the user') {
+            warn('message not sent: %o', err)
+          }
+        })
       }
     }
   })
