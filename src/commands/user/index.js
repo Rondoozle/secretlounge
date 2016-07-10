@@ -64,16 +64,9 @@ export default function userCommands (user, evt, reply) {
       }
       break
 
-    case 's':
     case 'sign':
-      sendToAll({
-        type: 'message',
-        user: evt.user,
-        text: '<b> ~' + getUsernameFromEvent(evt) + '</b>',
-        options: {
-          parse_mode: 'HTML'
-        }
-      })
+    case 's':
+      reply(cursive('this command has been disabled'))
       break
 
     case 'debug':
