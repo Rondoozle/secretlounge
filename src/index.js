@@ -62,7 +62,7 @@ export const sendToAll = (rawEvent) => {
         })
         .catch((err) => {
           if (err && err.message !== '403 {"ok":false,"error_code":403,"description":"Bot was blocked by the user"}') {
-            warn('message (%o) not sent: %o', eventToBeSent, err)
+            warn('message (%o) not sent to user (%o): %o', eventToBeSent, user, err)
           }
         })
       }
