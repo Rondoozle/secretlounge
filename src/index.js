@@ -115,7 +115,7 @@ const decreaseSpamScores = () => {
   const users = getUsers()
   return users.map((user) => {
     return updateUser(user.id, {
-      spamScore: user.spamScore - 1
+      spamScore: user.spamScore > 0 ? user.spamScore - 1 : 0
     })
   })
 }
