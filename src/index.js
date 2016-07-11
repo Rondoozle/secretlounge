@@ -43,14 +43,15 @@ export const sendToAll = (rawEvent) => {
   const evt = parseEvent(rawEvent)
   getUsers().map((user) => {
     if (user.debug || user.id !== evt.user) { // don't relay back to sender
-      const promises = networks.send({
+      const eventToBeSent = {
         ...evt,
         chat: user.id,
         options: {
           ...evt.options,
           reply_to_message_id: evt && evt.raw && evt.raw.reply_to_message && evt.raw.reply_to_message.message_id
         }
-      })
+      }
+      const promises = networks.send(eventToBeSent)
       if (evt.user) {
         // store message in history
         promises && promises[0] && promises[0].then((msg) => {
@@ -61,7 +62,7 @@ export const sendToAll = (rawEvent) => {
         })
         .catch((err) => {
           if (err && err.message !== '403 {"ok":false,"error_code":403,"description":"Bot was blocked by the user"}') {
-            warn('message not sent: %o', err)
+            warn('message (%o) not sent: %o', eventToBeSent, err)
           }
         })
       }
