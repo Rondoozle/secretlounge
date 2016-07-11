@@ -13,7 +13,8 @@ import {
   htmlMessage, cursive,
   getUsername, getUsernameFromEvent, getRealnameFromEvent,
   stringifyTimestamp,
-  USER_NOT_IN_CHAT, USER_IN_CHAT, USER_BANNED_FROM_CHAT, USER_JOINED_CHAT
+  USER_NOT_IN_CHAT, USER_IN_CHAT, USER_BANNED_FROM_CHAT, USER_JOINED_CHAT,
+  USER_SPAMMING
 } from './messages'
 import { RANKS } from './ranks'
 import { setCache, delCache } from './cache'
@@ -23,6 +24,7 @@ import {
 } from './db'
 import commands from './commands'
 import { HOURS } from './time'
+import { SPAM_LIMIT, SPAM_LIMIT_HIT, SPAM_INTERVAL } from './constants'
 
 const parseEvent = (rawEvent) => {
   if (typeof rawEvent === 'string') return { type: 'message', text: rawEvent }
@@ -71,6 +73,8 @@ const relay = (type) => {
   networks.on(type, (evt, reply) => {
     if (type !== 'message' || (evt && evt.text && evt.text.charAt(0) !== '/')) { // don't parse commands again
       const user = getUser(evt.user)
+      if (user.spamScore > SPAM_LIMIT) return reply(cursive(USER_SPAMMING))
+      else increaseSpamScore(user)
       if (user && isActive(user)) { // make sure user is in the group chat
         // otherwise, relay event to all users
         sendToAll(evt)
@@ -94,6 +98,28 @@ const updateUserFromEvent = (evt) => {
     } else warn('user detected, but no `from` information in message!')
   }
 }
+
+const increaseSpamScore = (user) => {
+  const newSpamScore =
+    user.spamScore >= SPAM_LIMIT
+    ? SPAM_LIMIT_HIT
+    : user.spamScore + 1
+
+  return updateUser(user.id, {
+    spamScore: newSpamScore
+  })
+}
+
+const decreaseSpamScores = () => {
+  const users = getUsers()
+  return users.map((user) => {
+    return updateUser(user.id, {
+      spamScore: user.spamScore - 1
+    })
+  })
+}
+
+setInterval(decreaseSpamScores, SPAM_INTERVAL)
 
 const showChangelog = (evt, reply) => {
   const user = getUser(evt.user)
