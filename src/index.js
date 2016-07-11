@@ -19,7 +19,7 @@ import {
 import { RANKS } from './ranks'
 import { setCache, delCache } from './cache'
 import {
-  getUser, getUsers, setRank, isActive, addUser, rejoinUser, updateUser,
+  getUser, getUsers, setRank, isActive, addUser, rejoinUser, updateUser, delUser,
   getSystemConfig
 } from './db'
 import commands from './commands'
