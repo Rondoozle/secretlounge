@@ -5,7 +5,7 @@ import {
   infoText, configSet, usersText,
   USER_NOT_IN_CHAT, USER_LEFT_CHAT
 } from '../../messages'
-import { delUser, getUsers, getSystemConfig, setDebugMode } from '../../db'
+import { kickUser, getUsers, getSystemConfig, setDebugMode } from '../../db'
 import { version } from '../../../package.json'
 
 export default function userCommands (user, evt, reply) {
@@ -35,7 +35,7 @@ export default function userCommands (user, evt, reply) {
 
     case 'stop':
       if (!user) return reply(cursive(USER_NOT_IN_CHAT))
-      delUser(evt.user)
+      kickUser(evt.user)
       sendToAll(htmlMessage(
         `${getUsername(user)} <i>${USER_LEFT_CHAT}</i>`
       ))
