@@ -1,10 +1,10 @@
 import dude from 'debug-dude'
 const { /*debug, log,*/ info /*, warn, error*/ } = dude('bot:commands:mod')
 
-import { sendToAll, sendToUser } from '../../index'
+import { sendToAll, sendToUser, sendToMods } from '../../index'
 import {
   cursive, htmlMessage,
-  modInfoText
+  modInfoText, getUsername
 } from '../../messages'
 import { getFromCache } from '../../cache'
 import {
@@ -55,7 +55,7 @@ export default function modCommands (user, evt, reply) {
           }
         })
         sendToMods({
-          ...htmlMessage(getUsername(user) + ' <i>warned user, has</i> <b>' + warnResult.warnings + '</b> <i>warnings now</i>'),
+          ...htmlMessage(getUsername(user) + ' <i>warned user' + getReason(evt) + ', has</i> <b>' + warnResult.warnings + '</b> <i>warnings now</i>'),
           options: {
             reply_to_message_id: evt.raw.reply_to_message.message_id,
             parse_mode: 'HTML'
@@ -80,7 +80,7 @@ export default function modCommands (user, evt, reply) {
           }
         })
         sendToMods({
-          ...htmlMessage(getUsername(user) + ' <i>kicked user, has</i> <b>' + kickResult.warnings + '</b> <i>warnings now</i>'),
+          ...htmlMessage(getUsername(user) + ' <i>kicked user' + getReason(evt) + ', has</i> <b>' + kickResult.warnings + '</b> <i>warnings now</i>'),
           options: {
             reply_to_message_id: evt.raw.reply_to_message.message_id,
             parse_mode: 'HTML'
@@ -109,7 +109,7 @@ export default function modCommands (user, evt, reply) {
           }
         })
         sendToMods({
-          ...htmlMessage(getUsername(user) + ' <i>banned user, has</i> <b>' + banResult.warnings + '</b> <i>warnings now</i>'),
+          ...htmlMessage(getUsername(user) + ' <i>banned user' + getReason(evt) + ', has</i> <b>' + banResult.warnings + '</b> <i>warnings now</i>'),
           options: {
             reply_to_message_id: evt.raw.reply_to_message.message_id,
             parse_mode: 'HTML'
