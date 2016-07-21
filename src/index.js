@@ -39,9 +39,9 @@ export const sendToUser = (id, rawEvent) => {
   })
 }
 
-export const sendToAll = (rawEvent) => {
+export const sendTo = (users, rawEvent) => {
   const evt = parseEvent(rawEvent)
-  getUsers().map((user) => {
+  users.map((user) => {
     if (user.debug || user.id !== evt.user) { // don't relay back to sender
       const promises = networks.send({
         ...evt,
@@ -74,6 +74,24 @@ export const sendToAll = (rawEvent) => {
     }
   })
 }
+
+export const sendToAll = (rawEvent) =>
+  sendTo(
+    getUsers(),
+    rawEvent
+  )
+
+export const sendToMods = (rawEvent) =>
+  sendTo(
+    getUsers().filter(u => u.rank >= RANKS.mod),
+    rawEvent
+  )
+
+export const sendToAdmins = (rawEvent) =>
+  sendTo(
+    getUsers().filter(u => u.rank >= RANKS.admin),
+    rawEvent
+  )
 
 const relay = (type) => {
   networks.on(type, (evt, reply) => {

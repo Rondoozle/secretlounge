@@ -18,6 +18,8 @@ const getReason = (evt) =>
   ? ' (' + evt.args.join(' ') + ')'
   : ''
 
+const ERR_NO_REPLY = 'please reply to a message to use this command'
+
 export default function modCommands (user, evt, reply) {
   let messageRepliedTo
 
@@ -52,7 +54,15 @@ export default function modCommands (user, evt, reply) {
             parse_mode: 'HTML'
           }
         })
-        reply(htmlMessage('<i>warned user, has</i> <b>' + warnResult.warnings + '</b> <i>warnings now</i>'))
+        sendToMods({
+          ...htmlMessage(getUsername(user) + ' <i>warned user, has</i> <b>' + warnResult.warnings + '</b> <i>warnings now</i>'),
+          options: {
+            reply_to_message_id: evt.raw.reply_to_message.message_id,
+            parse_mode: 'HTML'
+          }
+        })
+      } else {
+        reply(cursive(ERR_NO_REPLY))
       }
       break
 
@@ -69,7 +79,15 @@ export default function modCommands (user, evt, reply) {
             parse_mode: 'HTML'
           }
         })
-        reply(htmlMessage('<i>kicked user, has</i> <b>' + kickResult.warnings + '</b> <i>warnings now</i>'))
+        sendToMods({
+          ...htmlMessage(getUsername(user) + ' <i>kicked user, has</i> <b>' + kickResult.warnings + '</b> <i>warnings now</i>'),
+          options: {
+            reply_to_message_id: evt.raw.reply_to_message.message_id,
+            parse_mode: 'HTML'
+          }
+        })
+      } else {
+        reply(cursive(ERR_NO_REPLY))
       }
       break
 
@@ -90,7 +108,15 @@ export default function modCommands (user, evt, reply) {
             parse_mode: 'HTML'
           }
         })
-        reply(htmlMessage('<i>banned user, has</i> <b>' + banResult.warnings + '</b> <i>warnings now</i>'))
+        sendToMods({
+          ...htmlMessage(getUsername(user) + ' <i>banned user, has</i> <b>' + banResult.warnings + '</b> <i>warnings now</i>'),
+          options: {
+            reply_to_message_id: evt.raw.reply_to_message.message_id,
+            parse_mode: 'HTML'
+          }
+        })
+      } else {
+        reply(cursive(ERR_NO_REPLY))
       }
       break
   }
