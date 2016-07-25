@@ -17,7 +17,7 @@ import {
   USER_SPAMMING
 } from './messages'
 import { RANKS } from './ranks'
-import { setCache, delCache } from './cache'
+import { setCache, delCache, createCacheGroup, getCacheGroup } from './cache'
 import {
   getUser, getUsers, setRank, isActive, addUser, rejoinUser, updateUser, delUser,
   getSystemConfig
@@ -41,6 +41,12 @@ export const sendToUser = (id, rawEvent) => {
 
 export const sendTo = (users, rawEvent) => {
   const evt = parseEvent(rawEvent)
+  const cacheId = createCacheGroup()
+  let replyCache
+  if (evt && evt.raw && evt.raw.reply_to_message && evt.raw.reply_to_message.message_id) {
+    replyCache = getCacheGroup(evt.raw.reply_to_message.message_id)
+  }
+
   users.map((user) => {
     if (user.debug || user.id !== evt.user) { // don't relay back to sender
       const promises = networks.send({
@@ -48,13 +54,14 @@ export const sendTo = (users, rawEvent) => {
         chat: user.id,
         options: {
           ...evt.options,
-          reply_to_message_id: evt && evt.raw && evt.raw.reply_to_message && evt.raw.reply_to_message.message_id
+          reply_to_message_id: replyCache && replyCache[user.id]
         }
       })
       if (evt.user) {
         // store message in history
         promises && promises[0] && promises[0].then((msg) => {
-          setCache(msg.message_id, { sender: evt.user })
+          //      (messageId,      cacheId, sender,   receiver)
+          setCache(msg.message_id, cacheId, evt.user, user.id)
           setTimeout(() => {
             delCache(msg.message_id)
           }, 24 * HOURS)
