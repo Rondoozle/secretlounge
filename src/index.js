@@ -35,7 +35,6 @@ export const sendTo = (users, rawEvent, alwaysSend = false) => {
   const evt = parseEvent(rawEvent)
   const cacheId = createCacheGroup()
   let replyCache
-  console.log(evt)
   if (evt && evt.raw && evt.raw.reply_to_message && evt.raw.reply_to_message.message_id) {
     replyCache = getCacheGroup(evt.raw.reply_to_message.message_id)
   }
@@ -56,11 +55,9 @@ export const sendTo = (users, rawEvent, alwaysSend = false) => {
           reply_to_message_id: replyCache && replyCache[user.id]
         }
       })
-      console.log('hi!', replyCache, user.id)
       if (evt.user) {
         // store message in history
         promises && promises[0] && promises[0].then((msg) => {
-          console.log(msg.message_id, '->', user.id)
           //      (messageId,      cacheId, sender,   receiver)
           setCache(msg.message_id, cacheId, evt.user, user.id)
           setTimeout(() => {
