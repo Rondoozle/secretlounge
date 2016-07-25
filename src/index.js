@@ -31,15 +31,7 @@ const parseEvent = (rawEvent) => {
   else return rawEvent
 }
 
-export const sendToUser = (id, rawEvent) => {
-  const evt = parseEvent(rawEvent)
-  networks.send({
-    ...evt,
-    chat: id
-  })
-}
-
-export const sendTo = (users, rawEvent) => {
+export const sendTo = (users, rawEvent, alwaysSend = false) => {
   const evt = parseEvent(rawEvent)
   const cacheId = createCacheGroup()
   let replyCache
@@ -52,10 +44,10 @@ export const sendTo = (users, rawEvent) => {
   }
 
   users.map((user) => {
-    if (user.id === evt.user) {
+    if (evt && evt.raw && evt.raw.message_id && user.id === evt.user) {
       setCache(evt.raw.message_id, cacheId, evt.user, user.id)
     }
-    if (user.debug || user.id !== evt.user) { // don't relay back to sender
+    if (alwaysSend || user.debug || user.id !== evt.user) { // don't relay back to sender
       const promises = networks.send({
         ...evt,
         chat: user.id,
@@ -90,6 +82,13 @@ export const sendTo = (users, rawEvent) => {
     }
   })
 }
+
+export const sendToUser = (id, rawEvent) =>
+  sendTo(
+    [{ id }],
+    rawEvent,
+    true // alwaysSend
+  )
 
 export const sendToAll = (rawEvent) =>
   sendTo(
