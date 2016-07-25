@@ -43,38 +43,40 @@ export const sendTo = (users, rawEvent, alwaysSend = false) => {
   }
 
   users.map((user) => {
-    if (evt && evt.raw && evt.raw.message_id && user.id === evt.user) {
-      setCache(evt.raw.message_id, cacheId, evt.user, user.id)
-    }
-    if (alwaysSend || user.debug || user.id !== evt.user) { // don't relay back to sender
-      const promises = networks.send({
-        ...evt,
-        chat: user.id,
-        options: {
-          ...evt.options,
-          reply_to_message_id: replyCache && replyCache[user.id]
-        }
-      })
-      if (evt.user) {
-        // store message in history
-        promises && promises[0] && promises[0].then((msg) => {
-          //      (messageId,      cacheId, sender,   receiver)
-          setCache(msg.message_id, cacheId, evt.user, user.id)
-          setTimeout(() => {
-            delCache(msg.message_id)
-          }, 24 * HOURS)
-        })
-        .catch((err) => {
-          if (err && (
-            err.message === '403 {"ok":false,"error_code":403,"description":"Bot was blocked by the user"}'
-            || err.message === '400 {"ok":false,"error_code":400,"description":"PEER_ID_INVALID"}'
-          )) {
-            info('user (%o) blocked the bot, removing from the chat', user)
-            delUser(user.id)
-          } else {
-            warn('message not sent to user (%o): %o', user, err)
+    if (isActive(user)) {
+      if (evt && evt.raw && evt.raw.message_id && user.id === evt.user) {
+        setCache(evt.raw.message_id, cacheId, evt.user, user.id)
+      }
+      if (alwaysSend || user.debug || user.id !== evt.user) { // don't relay back to sender
+        const promises = networks.send({
+          ...evt,
+          chat: user.id,
+          options: {
+            ...evt.options,
+            reply_to_message_id: replyCache && replyCache[user.id]
           }
         })
+        if (evt.user) {
+          // store message in history
+          promises && promises[0] && promises[0].then((msg) => {
+            //      (messageId,      cacheId, sender,   receiver)
+            setCache(msg.message_id, cacheId, evt.user, user.id)
+            setTimeout(() => {
+              delCache(msg.message_id)
+            }, 24 * HOURS)
+          })
+          .catch((err) => {
+            if (err && (
+              err.message === '403 {"ok":false,"error_code":403,"description":"Bot was blocked by the user"}'
+              || err.message === '400 {"ok":false,"error_code":400,"description":"PEER_ID_INVALID"}'
+            )) {
+              info('user (%o) blocked the bot, removing from the chat', user)
+              delUser(user.id)
+            } else {
+              warn('message not sent to user (%o): %o', user, err)
+            }
+          })
+        }
       }
     }
   })
