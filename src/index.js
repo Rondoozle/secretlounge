@@ -43,11 +43,18 @@ export const sendTo = (users, rawEvent) => {
   const evt = parseEvent(rawEvent)
   const cacheId = createCacheGroup()
   let replyCache
+  console.log(evt)
   if (evt && evt.raw && evt.raw.reply_to_message && evt.raw.reply_to_message.message_id) {
     replyCache = getCacheGroup(evt.raw.reply_to_message.message_id)
   }
+  if (evt && evt.options && evt.options.reply_to_message_id) {
+    replyCache = getCacheGroup(evt.options.reply_to_message_id)
+  }
 
   users.map((user) => {
+    if (user.id === evt.user) {
+      setCache(evt.raw.message_id, cacheId, evt.user, user.id)
+    }
     if (user.debug || user.id !== evt.user) { // don't relay back to sender
       const promises = networks.send({
         ...evt,
@@ -57,9 +64,11 @@ export const sendTo = (users, rawEvent) => {
           reply_to_message_id: replyCache && replyCache[user.id]
         }
       })
+      console.log('hi!', replyCache, user.id)
       if (evt.user) {
         // store message in history
         promises && promises[0] && promises[0].then((msg) => {
+          console.log(msg.message_id, '->', user.id)
           //      (messageId,      cacheId, sender,   receiver)
           setCache(msg.message_id, cacheId, evt.user, user.id)
           setTimeout(() => {
