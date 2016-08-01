@@ -53,7 +53,8 @@ export const sendTo = (users, rawEvent, alwaysSend = false) => {
           chat: user.id,
           options: {
             ...evt.options,
-            reply_to_message_id: replyCache && replyCache[user.id]
+            reply_to_message_id: replyCache && replyCache[user.id],
+            caption: evt.raw && evt.raw.caption
           }
         })
         if (evt.user) {
