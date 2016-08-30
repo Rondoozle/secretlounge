@@ -122,7 +122,7 @@ const relay = (type) => {
     if (type !== 'message' || (evt && evt.text && evt.text.charAt(0) !== '/')) { // don't parse commands again
       const user = getUser(evt.user)
       if (user) {
-        if (user.spamScore > SPAM_LIMIT) return reply(cursive(USER_SPAMMING))
+        if ((user.spamScore + calcSpamScore(evt)) > SPAM_LIMIT) return reply(cursive(USER_SPAMMING))
         else increaseSpamScore(user, evt)
       }
       if (user && isActive(user)) { // make sure user is in the group chat
@@ -169,7 +169,7 @@ const calcSpamScore = (evt) => {
 const increaseSpamScore = (user, evt) => {
   const incSpamScore = calcSpamScore(evt)
   const newSpamScore =
-    (user.spamScore + incSpamScore) >= SPAM_LIMIT // if this will put the score above 3.0, don't send.
+    (user.spamScore + incSpamScore) >= SPAM_LIMIT
     ? SPAM_LIMIT_HIT
     : user.spamScore + incSpamScore
 

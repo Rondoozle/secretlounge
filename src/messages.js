@@ -6,7 +6,7 @@ export const USER_IN_CHAT = 'you\'re already in the chat!'
 export const USER_BANNED_FROM_CHAT = 'you\'re banned from this chat'
 export const USER_LEFT_CHAT = 'left the chat'
 export const USER_JOINED_CHAT = 'joined the chat'
-export const USER_SPAMMING = 'you\'re sending too many messages'
+export const USER_SPAMMING = 'your recent messages have been deemed spammy, if this is a false positive contact @omnidan or @hdrive'
 
 const parseValue = (val) => {
   if (typeof val === 'boolean') return val ? 'on' : 'off'
