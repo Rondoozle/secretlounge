@@ -13,7 +13,10 @@ Available as [@secretloungebot](https://telegram.me/secretloungebot) on [telegra
 git clone https://github.com/6697/secretlounge
 cd secretlounge
 npm install
+npm install coffea@1.0.0-beta18
 ```
+
+(the last line is a workaround for an npm bug that makes it think `beta9` is higher than `beta18`)
 
 
 ## Config
