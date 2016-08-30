@@ -24,7 +24,16 @@ import {
 } from './db'
 import commands from './commands'
 import { HOURS } from './time'
-import { SPAM_LIMIT, SPAM_LIMIT_HIT, SPAM_INTERVAL } from './constants'
+import {
+  LINK_REGEX,
+  SPAM_LIMIT,
+  SPAM_LIMIT_HIT,
+  SPAM_INTERVAL,
+  SCORE_MESSAGE,
+  SCORE_LINK,
+  SCORE_STICKER,
+  SCORE_CHARACTER
+} from './constants'
 
 const parseEvent = (rawEvent) => {
   if (typeof rawEvent === 'string') return { type: 'message', text: rawEvent }
@@ -114,7 +123,7 @@ const relay = (type) => {
       const user = getUser(evt.user)
       if (user) {
         if (user.spamScore > SPAM_LIMIT) return reply(cursive(USER_SPAMMING))
-        else increaseSpamScore(user)
+        else increaseSpamScore(user, evt)
       }
       if (user && isActive(user)) { // make sure user is in the group chat
         // otherwise, relay event to all users
@@ -140,11 +149,29 @@ const updateUserFromEvent = (evt) => {
   }
 }
 
-const increaseSpamScore = (user) => {
+const calcSpamScore = (evt) => {
+  switch (evt.type) {
+    case 'sticker':
+      return SCORE_STICKER
+    case 'message':
+      if (LINK_REGEX.test(evt.text)) {
+        return SCORE_MESSAGE + // regular message
+          (evt.text.length * SCORE_CHARACTER) + // characters count, still
+          ((evt.text.match(LINK_REGEX) || []).length * SCORE_LINK); // number of links * score
+      }
+
+      return SCORE_MESSAGE + (evt.text.length * SCORE_CHARACTER) // regular message + character count
+    default:
+      return SCORE_MESSAGE
+  }
+};
+
+const increaseSpamScore = (user, evt) => {
+  const incSpamScore = calcSpamScore(evt)
   const newSpamScore =
-    user.spamScore >= SPAM_LIMIT
+    (user.spamScore + incSpamScore) >= SPAM_LIMIT // if this will put the score above 3.0, don't send.
     ? SPAM_LIMIT_HIT
-    : user.spamScore + 1
+    : user.spamScore + incSpamScore
 
   return updateUser(user.id, {
     spamScore: newSpamScore
