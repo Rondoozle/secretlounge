@@ -44,7 +44,7 @@ export default function modCommands (user, evt, reply) {
 
     case 'delete':
       messageRepliedTo = getFromCache(evt, reply)
-      let replyCache = getCacheGroup(evt.raw.reply_to_message.message_id)
+      let replyCache = getCacheGroup(evt && evt.raw && evt.raw.reply_to_message.message_id)
 
       if (messageRepliedTo) {
         // for everyone who is not a mod or higher, or not the sender, edit the message this is referencing.
@@ -65,7 +65,7 @@ export default function modCommands (user, evt, reply) {
         sendToUser(messageRepliedTo.sender, {
           ...htmlMessage('<i>this message has now been deleted, only you can see the content of the above message</i>'),
           options: {
-            reply_to_message_id: evt.raw.reply_to_message.message_id,
+            reply_to_message_id: evt && evt.raw && evt.raw.reply_to_message.message_id,
             parse_mode: 'HTML'
           }
         })
