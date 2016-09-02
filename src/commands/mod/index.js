@@ -6,9 +6,9 @@ import {
   cursive, htmlMessage,
   modInfoText, getUsername
 } from '../../messages'
-import { getFromCache } from '../../cache'
+import { getFromCache, getCacheGroup } from '../../cache'
 import {
-  getUserByUsername, getUser,
+  getUserByUsername, getUser, getUsers,
   warnUser, kickUser, banUser
 } from '../../db'
 import { RANKS } from '../../ranks'
@@ -39,6 +39,45 @@ export default function modCommands (user, evt, reply) {
             modInfoText(user)
           ))
         }
+      }
+      break
+
+    case 'delete':
+      messageRepliedTo = getFromCache(evt, reply)
+      let replyCache = getCacheGroup(evt.raw.reply_to_message.message_id)
+
+      if (messageRepliedTo) {
+        // for everyone who is not a mod or higher, or not the sender, edit the message this is referencing.
+        info('%o deleted message of user %o', user, getUser(messageRepliedTo.sender))
+        getUsers().map((user) => {
+          if (user.rank < RANKS.mod && messageRepliedTo.sender !== user.id) {
+            reply({
+              type: 'editMessageText',
+              chat: user.id,
+              id: replyCache && replyCache[user.id],
+              text: '<i>this message disappeared into the ether</i>',
+              options: {
+                parse_mode: 'HTML'
+              }
+            })
+          }
+        })
+        sendToUser(messageRepliedTo.sender, {
+          ...htmlMessage('<i>this message has now been deleted, only you can see the content of the above message</i>'),
+          options: {
+            reply_to_message_id: evt.raw.reply_to_message.message_id,
+            parse_mode: 'HTML'
+          }
+        })
+        sendToMods({
+          ...htmlMessage(getUsername(user) + '<i> deleted the above message</i>'),
+          options: {
+            reply_to_message_id: replyCache && replyCache[user.id],
+            parse_mode: 'HTML'
+          }
+        })
+      } else {
+        reply(cursive(ERR_NO_REPLY))
       }
       break
 
